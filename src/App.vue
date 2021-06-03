@@ -135,7 +135,7 @@
 </template>
 
 <script>
-import { getData, getProjectList } from '@/api/test'
+import { getData, getProjectList } from '@/api/data'
 export default {
   name: 'App',
   data () {
@@ -201,6 +201,7 @@ export default {
     async fetchData () {
       const projectList = await getProjectList({ page: this.currentPage, size: 4, productType: 1 })
       this.listTotal = projectList.data.totalElements
+      // 默认页面打开时显示第一个项目的数据
       if (this.currentProjectId === undefined) {
         this.currentProjectId = projectList.data.content[0].id
       }
