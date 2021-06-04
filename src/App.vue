@@ -1,7 +1,7 @@
 <template>
   <div class="app">
     <header>
-      <h1>山东经典重工大数据云图</h1>
+      <h1>富煌钢构BIM+智慧工地数字化项目管理平台</h1>
     </header>
     <main>
       <div class="left">
@@ -26,6 +26,7 @@
               </template>
             </el-table-column>
           </el-table>
+
           <el-pagination
             background
             small
@@ -121,7 +122,10 @@
       </div>
       <div class="right">
         <div class="monitor">
-          <div class="monitor__title"><span>监控未连接</span></div>
+          <div class="monitor__title">
+            <span>监控未连接</span>
+          </div>
+          <monitor v-if="monitorArr.length !== 0" :camera-index-code="monitorArr[0]" />
         </div>
         <div class="monitor">
           <div class="monitor__title"><span>监控未连接</span></div>
@@ -135,9 +139,11 @@
 </template>
 
 <script>
-import { getData, getProjectList } from '@/api/data'
+import { getData, getProjectList, getMonitor } from '@/api/data'
+import Monitor from '@/components/monitor/index.vue'
 export default {
   name: 'App',
+  components: { Monitor },
   data () {
     return {
       myChart: null,
@@ -146,13 +152,27 @@ export default {
       listTotal: null,
       currentPage: 1,
       currentProjectId: undefined,
-      meteArr: []
+      meteArr: [],
+      monitorArr: []
     }
+  },
+  created () {
+    this.$nextTick(() => {
+      this.getMonitor()
+    })
   },
   mounted () {
     this.$nextTick(() => {
       this.fetchData()
     })
+  },
+  watch: {
+    currentPage: {
+      handler () {
+        this.fetchProject()
+      },
+      immediate: true
+    }
   },
   methods: {
     init () {
@@ -197,6 +217,15 @@ export default {
     changeId (id) {
       this.currentProjectId = id
       this.fetchData()
+    },
+    async fetchProject () {
+      const projectList = await getProjectList({ page: this.currentPage, size: 4, productType: 1 })
+      this.listTotal = projectList.data.totalElements
+    },
+    async getMonitor () {
+      const monitorRes = await getMonitor({ pageNo: 1, pageSize: 100 })
+      console.log(monitorRes)
+      this.monitorArr = monitorRes.data['资源唯一编码(在线)']
     },
     async fetchData () {
       const projectList = await getProjectList({ page: this.currentPage, size: 4, productType: 1 })

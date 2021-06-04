@@ -3,7 +3,7 @@ import axios from 'axios'
 export function request (config) {
   const instance = axios.create({
     baseURL: 'http://192.168.10.138:8080',
-    timeout: 5000,
+    timeout: 600000,
     headers: { 'Content-Type': 'application/json' }
   })
   instance.interceptors.request.use(config => {
