@@ -4,136 +4,144 @@
       <h1>富煌钢构BIM+智慧工地数字化项目管理平台</h1>
     </header>
     <main>
-      <div class="left">
-        <div class="project-list project">
-          <div class="title">项目列表</div>
-          <el-table
-            :data="projectList"
-            stripe
-            :header-cell-style="{background:'#0a73ff',borderColor:'#CECECE',textAlign:'center'}"
-            style="width: 100%">
-            <el-table-column style="cursor: pointer;" type="index" label="序号">
-            </el-table-column>
-            <el-table-column prop="name" label="项目名称">
-              <template slot-scope="scope">
-                <span style="cursor: pointer;" @click="changeId(scope.row.projectId)">{{ scope.row.name }}</span>
-              </template>
-            </el-table-column>
-            <el-table-column style="cursor: pointer;" prop="radio" label="完成占比">
-              <template slot-scope="scope">
-                <el-progress v-if="scope.row.radio" :percentage="scope.row.radio"></el-progress>
-                <el-progress v-else :percentage="0"></el-progress>
-              </template>
-            </el-table-column>
-          </el-table>
+      <el-row>
+        <el-col :span="6">
+          <div class="left">
+            <div class="project-list project">
+              <div class="title">项目列表</div>
+              <el-table
+                :data="projectList"
+                stripe
+                :header-cell-style="{background:'#0a73ff',borderColor:'#CECECE',textAlign:'center'}"
+                style="width: 100%">
+                <el-table-column style="cursor: pointer;" type="index" label="序号">
+                </el-table-column>
+                <el-table-column prop="name" label="项目名称">
+                  <template slot-scope="scope">
+                    <span style="cursor: pointer;" @click="changeId(scope.row.projectId)">{{ scope.row.name }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column style="cursor: pointer;" prop="radio" label="完成占比">
+                  <template slot-scope="scope">
+                    <el-progress v-if="scope.row.radio" :percentage="scope.row.radio"></el-progress>
+                    <el-progress v-else :percentage="0"></el-progress>
+                  </template>
+                </el-table-column>
+              </el-table>
 
-          <el-pagination
-            background
-            small
-            :current-page.sync="currentPage"
-            :page-size="4"
-            layout="prev, pager, next"
-            :total="listTotal">
-          </el-pagination>
-        </div>
-        <div class="project-analyse project">
-          <div class="title">项目月安装分析</div>
-          <div class="pic"></div>
-        </div>
-        <div class="attendance project">
-          <div class="title">工地今日出勤</div>
-          <el-table
-            :data="attendanceList"
-            stripe
-            :header-cell-style="{background:'#0a73ff',borderColor:'#CECECE',textAlign:'center'}"
-            style="width: 100%">
-            <el-table-column prop="type" label="工种" />
-            <el-table-column prop="projectName" label="人员" />
-            <el-table-column prop="test" label="出勤" />
-            <el-table-column prop="test" label="缺勤" />
-          </el-table>
-        </div>
-      </div>
-      <div class="center">
-        <div class="title">
-          <h2>***国际办公c区</h2>
-        </div>
-        <div class="data">
-          <div class="data__left">
-            <div class="data__left-up">
-              <div>
-                <div class="icon iconfont">&#xe6a3;</div>
-                <h3>XXX</h3>
-                <p>今日施工人数</p>
-              </div>
-              <div>
-                <div class="icon iconfont">&#xe6d5;</div>
-                <h3>XXX</h3>
-                <p>工期</p>
-              </div>
-              <div>
-                <div class="icon iconfont">&#xe6eb;</div>
-                <h3>XXX</h3>
-                <p>结构量</p>
-              </div>
+              <el-pagination
+                background
+                small
+                :current-page.sync="currentPage"
+                :page-size="4"
+                layout="prev, pager, next"
+                :total="listTotal">
+              </el-pagination>
             </div>
-            <div class="data__left-down">
-              <div>
-                <div class="icon iconfont">&#xe6a3;</div>
-                <h3>XXX</h3>
-                <p>管理人员人数</p>
-              </div>
-              <div>
-                <div class="icon iconfont">&#xe6e0;</div>
-                <h3>XXX</h3>
-                <p>安全生产</p>
-              </div>
-              <div>
-                <div class="icon iconfont">&#xe6af;</div>
-                <h3>XXX</h3>
-                <p>项目面积</p>
-              </div>
+            <div class="project-analyse project">
+              <div class="title">项目月安装分析</div>
+              <div class="pic"></div>
+            </div>
+            <div class="attendance project">
+              <div class="title">工地今日出勤</div>
+              <el-table
+                :data="attendanceList"
+                stripe
+                :header-cell-style="{background:'#0a73ff',borderColor:'#CECECE',textAlign:'center'}"
+                style="width: 100%">
+                <el-table-column prop="type" label="工种" />
+                <el-table-column prop="projectName" label="人员" />
+                <el-table-column prop="test" label="出勤" />
+                <el-table-column prop="test" label="缺勤" />
+              </el-table>
             </div>
           </div>
-          <div class="data__right">
-            <div>
-              <span>PM2.5:</span><b>33μg/m3</b>
+        </el-col>
+        <el-col :span="12">
+          <div class="center">
+            <div class="title">
+              <h2>***国际办公c区</h2>
             </div>
-            <div>
-              <span>PM10:</span><b>33μg/m3</b>
+            <div class="data">
+              <div class="data__left">
+                <div class="data__left-up">
+                  <div>
+                    <div class="icon iconfont">&#xe6a3;</div>
+                    <h3>XXX</h3>
+                    <p>今日施工人数</p>
+                  </div>
+                  <div>
+                    <div class="icon iconfont">&#xe6d5;</div>
+                    <h3>XXX</h3>
+                    <p>工期</p>
+                  </div>
+                  <div>
+                    <div class="icon iconfont">&#xe6eb;</div>
+                    <h3>XXX</h3>
+                    <p>结构量</p>
+                  </div>
+                </div>
+                <div class="data__left-down">
+                  <div>
+                    <div class="icon iconfont">&#xe6a3;</div>
+                    <h3>XXX</h3>
+                    <p>管理人员人数</p>
+                  </div>
+                  <div>
+                    <div class="icon iconfont">&#xe6e0;</div>
+                    <h3>XXX</h3>
+                    <p>安全生产</p>
+                  </div>
+                  <div>
+                    <div class="icon iconfont">&#xe6af;</div>
+                    <h3>XXX</h3>
+                    <p>项目面积</p>
+                  </div>
+                </div>
+              </div>
+              <div class="data__right">
+                <div>
+                  <span>PM2.5:</span><b>33μg/m3</b>
+                </div>
+                <div>
+                  <span>PM10:</span><b>33μg/m3</b>
+                </div>
+                <div>
+                  <span>SO2:</span><b>33μg/m3</b>
+                </div>
+                <div>
+                  <span>NO2:</span><b>33μg/m3</b>
+                </div>
+                <div>
+                  <span>O3:</span><b>33μg/m3</b>
+                </div>
+                <div>
+                  <span>CO:</span><b>33μg/m3</b>
+                </div>
+              </div>
             </div>
-            <div>
-              <span>SO2:</span><b>33μg/m3</b>
-            </div>
-            <div>
-              <span>NO2:</span><b>33μg/m3</b>
-            </div>
-            <div>
-              <span>O3:</span><b>33μg/m3</b>
-            </div>
-            <div>
-              <span>CO:</span><b>33μg/m3</b>
-            </div>
+            <!-- 改为iframe -->
+            <iframe class="model">
+            </iframe>
           </div>
-        </div>
-        <!-- 改为iframe -->
-        <iframe class="model">
-        </iframe>
-      </div>
-      <div class="right">
-        <div class="monitor">
-          <div class="monitor__title">
-            <span>监控未连接</span>
+        </el-col>
+        <el-col :span="6">
+          <div class="right">
+            <div class="monitor">
+              <div class="monitor__title">
+                <span>监控未连接</span>
+              </div>
+              <monitor v-if="monitorArr.length !== 0" :camera-index-code="monitorArr[0]" />
+            </div>
+            <div class="monitor">
+              <div class="monitor__title"><span>监控未连接</span></div>
+              </div>
+            <div class="monitor">
+              <div class="monitor__title"><span>监控未连接</span></div>
+              </div>
           </div>
-          <monitor v-if="monitorArr.length !== 0" :camera-index-code="monitorArr[0]" />
-        </div>
-        <div class="monitor">
-          <div class="monitor__title"><span>监控未连接</span></div>
-          </div>
-        <div class="monitor">
-          <div class="monitor__title"><span>监控未连接</span></div>
-          </div>
-      </div>
+        </el-col>
+      </el-row>
     </main>
   </div>
 </template>
@@ -306,7 +314,7 @@ $--grey: rgb(214,224,235);
     }
   }
   main{
-    display: flex;
+    // display: flex;
     margin: 0 30px;
     height: calc( 100vh - 150px );
   }
@@ -324,7 +332,7 @@ $--grey: rgb(214,224,235);
     -moz-osx-font-smoothing: grayscale;
   }
   .center{
-    width: 900px;
+    // width: 900px;
     height: 100%;
     margin: 0 20px;
     .title{
@@ -407,7 +415,7 @@ $--grey: rgb(214,224,235);
     }
   }
   .left{
-    flex: 1;
+    // flex: 1;
     height: 100%;
     .project{
       position: relative;
@@ -439,7 +447,7 @@ $--grey: rgb(214,224,235);
     }
   }
   .right{
-    flex: 1;
+    // flex: 1;
     height: 100%;
     .monitor{
       height: 240px;
