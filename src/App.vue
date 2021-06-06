@@ -336,12 +336,12 @@ $--grey: rgb(214,224,235);
     height: 100%;
     margin: 0 20px;
     .title{
-      height: 56px;
+      height: 45px;
       background: $--light-blue;
       border-radius: 10px;
       h2{
         color: #fff;
-        line-height: 56px;
+        line-height: 45px;
         font-size: 24px;
         font-family: arial, Arial, sans-serif;
         text-align: center;
@@ -351,7 +351,7 @@ $--grey: rgb(214,224,235);
     .data{
       position: relative;
       height: 184px;
-      margin-bottom: 15px;
+      margin-bottom: 32px;
       color: #fff;
       .icon{
         float: left;
