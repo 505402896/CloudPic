@@ -284,8 +284,14 @@ export default {
       this.$refs.monitorFirst.preview(indexCode)
     },
     async fetchProject () {
-      const projectList = await getProjectList({ page: this.currentPage, size: 4, productType: 1 })
-      this.listTotal = projectList.data.totalElements
+      try {
+        const projectList = await getProjectList({ page: this.currentPage, size: 4, productType: 1 })
+        if (projectList) {
+          this.listTotal = projectList.data.totalElements
+        }
+      } catch (error) {
+        console.log(error)
+      }
     },
     async getMonitor () {
       const monitorRes = await getMonitor({ pageNo: 1, pageSize: 100, projectId: this.currentProjectId })
@@ -309,28 +315,31 @@ export default {
           this.listTotal = projectList.data.totalElements
         }
         // 默认页面打开时显示第一个项目的数据
-        if (this.currentProjectId === undefined) {
+        if (this.currentProjectId === undefined && projectList) {
           this.currentProjectId = projectList.data.content[0].id
           this.currentProjectName = projectList.data.content[0].name
+
+          this.projectList = projectList.data.content.map(v => {
+            v.radio = Number((v.mete / v.totalMete * 100).toFixed(1))
+            v.projectId = v.id
+            return v
+          })
         }
-        this.projectList = projectList.data.content.map(v => {
-          v.radio = Number((v.mete / v.totalMete * 100).toFixed(1))
-          v.projectId = v.id
-          return v
-        })
         const chart = await getChart({ projectId: this.currentProjectId, productType: 1, date: Date.parse(new Date()) })
         const mete = []
-        // 默认12个月都为0
-        this.meteArr = new Array(12).fill(0)
-        chart.data.months.map(v => {
-          mete.push({ month: Number(v.date.substring(5)), mete: v.mete, quantity: v.quantity })
-        })
-        for (let i = 0; i <= 12; i++) {
-          mete.map(v => {
-            if (i + 1 === v.month) {
-              this.meteArr[i] = v.mete
-            }
+        if (chart && chart.data) {
+          // 默认12个月都为0
+          this.meteArr = new Array(12).fill(0)
+          chart.data.months.map(v => {
+            mete.push({ month: Number(v.date.substring(5)), mete: v.mete, quantity: v.quantity })
           })
+          for (let i = 0; i <= 12; i++) {
+            mete.map(v => {
+              if (i + 1 === v.month) {
+                this.meteArr[i] = v.mete
+              }
+            })
+          }
         }
       } catch (error) {
         console.log(error)
@@ -343,7 +352,7 @@ export default {
     async fetchOtherData () {
       try {
         const otherData = await get({ projectId: this.currentProjectId })
-        if (otherData.data) {
+        if (otherData && otherData.data) {
           this.buildersNumber = otherData.data.buildersNumber
           this.managerNumber = otherData.data.managerNumber
           this.duration = otherData.data.duration
