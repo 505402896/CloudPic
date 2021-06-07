@@ -12,7 +12,7 @@
               <el-table
                 :data="projectList"
                 stripe
-                :header-cell-style="{background:'#0a73ff',borderColor:'#CECECE',textAlign:'center'}"
+                :header-cell-style="{background:'#0A1121',borderColor:'#0A1121',textAlign:'center'}"
                 style="width: 100%">
                 <el-table-column style="cursor: pointer;" type="index" label="序号">
                 </el-table-column>
@@ -47,12 +47,13 @@
               <el-table
                 :data="attendanceList"
                 stripe
-                :header-cell-style="{background:'#0a73ff',borderColor:'#CECECE',textAlign:'center'}"
-                style="width: 100%">
-                <el-table-column prop="type" label="工种" />
-                <el-table-column prop="projectName" label="人员" />
-                <el-table-column prop="test" label="出勤" />
-                <el-table-column prop="test" label="缺勤" />
+                :height="223"
+                :header-cell-style="{background:'#0A1121',borderColor:'#0A1121',textAlign:'center'}"
+                style="width: 100%;">
+                <el-table-column prop="profession" label="工种" />
+                <el-table-column prop="peopleNumber" label="人数" />
+                <el-table-column prop="absenteeism" label="出勤" />
+                <el-table-column prop="attendance" label="缺勤" />
               </el-table>
             </div>
           </div>
@@ -60,85 +61,114 @@
         <el-col :span="12">
           <div class="center">
             <div class="title">
-              <h2>***国际办公c区</h2>
+              <h2>{{ currentProjectName }}</h2>
             </div>
             <div class="data">
               <div class="data__left">
                 <div class="data__left-up">
                   <div>
                     <div class="icon iconfont">&#xe6a3;</div>
-                    <h3>XXX</h3>
+                    <h3>{{ buildersNumber }}</h3>
                     <p>今日施工人数</p>
                   </div>
                   <div>
                     <div class="icon iconfont">&#xe6d5;</div>
-                    <h3>XXX</h3>
+                    <h3>{{ `${duration} 天` }}</h3>
                     <p>工期</p>
                   </div>
                   <div>
                     <div class="icon iconfont">&#xe6eb;</div>
-                    <h3>XXX</h3>
+                    <h3>{{ `${amountStructure} t` }}</h3>
                     <p>结构量</p>
                   </div>
                 </div>
                 <div class="data__left-down">
                   <div>
                     <div class="icon iconfont">&#xe6a3;</div>
-                    <h3>XXX</h3>
+                    <h3>{{ managerNumber }}</h3>
                     <p>管理人员人数</p>
                   </div>
                   <div>
                     <div class="icon iconfont">&#xe6e0;</div>
-                    <h3>XXX</h3>
+                    <h3>{{ `${safetyPoduction} 天` }}</h3>
                     <p>安全生产</p>
                   </div>
                   <div>
                     <div class="icon iconfont">&#xe6af;</div>
-                    <h3>XXX</h3>
+                    <h3>{{ `${projectArea} ㎡` }}</h3>
                     <p>项目面积</p>
                   </div>
                 </div>
               </div>
               <div class="data__right">
                 <div>
-                  <span>PM2.5:</span><b>33μg/m3</b>
+                  <span>PM2.5:</span><b>{{ fineParticulateMatter }}</b>
                 </div>
                 <div>
-                  <span>PM10:</span><b>33μg/m3</b>
+                  <span>PM10:</span><b>{{ inhalableParticle }}</b>
                 </div>
                 <div>
-                  <span>SO2:</span><b>33μg/m3</b>
+                  <span>SO2:</span><b>{{ sulfurDioxide }}</b>
                 </div>
                 <div>
-                  <span>NO2:</span><b>33μg/m3</b>
+                  <span>NO2:</span><b>{{ nitrogenDioxide }}</b>
                 </div>
                 <div>
-                  <span>O3:</span><b>33μg/m3</b>
+                  <span>O3:</span><b>{{ ozone }}</b>
                 </div>
                 <div>
-                  <span>CO:</span><b>33μg/m3</b>
+                  <span>CO:</span><b>{{ carbonicOxide }}</b>
                 </div>
               </div>
             </div>
-            <!-- 改为iframe -->
-            <iframe class="model">
-            </iframe>
+            <el-row>
+              <el-col :span="18">
+                <iframe class="model">
+                </iframe>
+              </el-col>
+              <el-col :span="6">
+                <div class="monitorList">
+                  <div class="monitorList__title">
+                    <span>监控列表（在线）</span>
+                  </div>
+                  <el-table
+                  :data="monitorList"
+                  stripe
+                  :height="514"
+                  :header-cell-style="{background:'#0A1121',borderColor:'#0A1121',textAlign:'center'}"
+                  style="width: 100%">
+                    <el-table-column type="index" label="序号" />
+                    <el-table-column prop="name" label="区域名">
+                      <template slot-scope="scope">
+                        <span style="cursor: pointer;" @click="changeMonitor(scope.row.indexCode)">{{ scope.row.name }}</span>
+                      </template>
+                    </el-table-column>
+                  </el-table>
+                </div>
+              </el-col>
+            </el-row>
           </div>
         </el-col>
         <el-col :span="6">
           <div class="right">
+            <div class="monitor" v-loading="loading">
+              <monitor v-if="monitorArr.length !== 0" ref="monitorFirst" :camera-index-code="monitorFirst" modelId="playModeOne" />
+              <div class="monitor__title" v-else>
+                <span>监控未连接</span>
+              </div>
+            </div>
             <div class="monitor">
+              <monitor v-if="monitorArr.length !== 0" :camera-index-code="monitorSec" modelId="playModeTwo" />
+              <div class="monitor__title" v-else>
+                <span>监控未连接</span>
+              </div>
+            </div>
+            <div class="monitor">
+              <!-- <monitor v-if="monitorArr.length !== 0" :camera-index-code="monitorArr[2]" style="padding:2px" /> -->
               <div class="monitor__title">
                 <span>监控未连接</span>
               </div>
-              <monitor v-if="monitorArr.length !== 0" :camera-index-code="monitorArr[0]" />
             </div>
-            <div class="monitor">
-              <div class="monitor__title"><span>监控未连接</span></div>
-              </div>
-            <div class="monitor">
-              <div class="monitor__title"><span>监控未连接</span></div>
-              </div>
           </div>
         </el-col>
       </el-row>
@@ -147,7 +177,7 @@
 </template>
 
 <script>
-import { getData, getProjectList, getMonitor } from '@/api/data'
+import { getChart, getProjectList, getMonitor, get } from '@/api/data'
 import Monitor from '@/components/monitor/index.vue'
 export default {
   name: 'App',
@@ -160,16 +190,38 @@ export default {
       listTotal: null,
       currentPage: 1,
       currentProjectId: undefined,
+      currentProjectName: '',
       meteArr: [],
-      monitorArr: []
+      monitorArr: [],
+      monitorList: [], // 监控在线列表
+      monitorFirst: '', // 第一个监控
+      monitorSec: '', // 第二个监控
+      monitorThird: '', // 第三个监控
+      buildersNumber: 0, // 今日施工人数
+      managerNumber: 0, // 管理人数
+      duration: 0,  // 工期
+      safetyPoduction: 0, // 安全生产天数
+      amountStructure: 0, // 结构量
+      projectArea: 0, // 项目面积
+      fineParticulateMatter: 0, // PM2.5
+      inhalableParticle: 0, // PM10
+      sulfurDioxide: 0, // SO2
+      nitrogenDioxide: 0, // NO2
+      ozone: 0, // O3
+      carbonicOxide: 0, // CO
+      weather: '', // 天气现象
+      temperature: '', // 实时温度
+      windDirection: '', // 风力描述
+      windPower: '', // 风力级别
+      humidity: '' // 空气湿度
+    }
+  },
+  computed: {
+    loading () {
+      return this.monitorArr.length === 0
     }
   },
   created () {
-    this.$nextTick(() => {
-      this.getMonitor()
-    })
-  },
-  mounted () {
     this.$nextTick(() => {
       this.fetchData()
     })
@@ -226,42 +278,97 @@ export default {
       this.currentProjectId = id
       this.fetchData()
     },
+    changeMonitor (indexCode) {
+      this.$refs.monitorFirst.stop()
+      // this.monitorFirst = indexCode
+      this.$refs.monitorFirst.preview(indexCode)
+    },
     async fetchProject () {
       const projectList = await getProjectList({ page: this.currentPage, size: 4, productType: 1 })
       this.listTotal = projectList.data.totalElements
     },
     async getMonitor () {
-      const monitorRes = await getMonitor({ pageNo: 1, pageSize: 100 })
-      console.log(monitorRes)
-      this.monitorArr = monitorRes.data['资源唯一编码(在线)']
-    },
-    async fetchData () {
-      const projectList = await getProjectList({ page: this.currentPage, size: 4, productType: 1 })
-      this.listTotal = projectList.data.totalElements
-      // 默认页面打开时显示第一个项目的数据
-      if (this.currentProjectId === undefined) {
-        this.currentProjectId = projectList.data.content[0].id
-      }
-      this.projectList = projectList.data.content.map(v => {
-        v.radio = Number((v.mete / v.totalMete * 100).toFixed(1))
-        v.projectId = v.id
-        return v
-      })
-      const res = await getData({ projectId: this.currentProjectId, productType: 1, date: Date.parse(new Date()) })
-      const mete = []
-      // 默认12个月都为0
-      this.meteArr = new Array(12).fill(0)
-      res.data.months.map(v => {
-        mete.push({ month: Number(v.date.substring(5)), mete: v.mete, quantity: v.quantity })
-      })
-      for (let i = 1; i <= 12; i++) {
-        mete.map(v => {
-          if (i === v.month) {
-            this.meteArr[i] = v.mete
+      const monitorRes = await getMonitor({ pageNo: 1, pageSize: 100, projectId: this.currentProjectId })
+      if (monitorRes) {
+        this.monitorList = monitorRes.data.content.map(v => {
+          // 在线设备为1  离线为0
+          if (v.online === 1) {
+            this.monitorArr.push(v.indexCode)
+            v.name = v.cn
+            return v
           }
         })
+        this.monitorFirst = this.monitorArr[0]
+        this.monitorSec = this.monitorArr[1]
       }
-      this.init()
+    },
+    async fetchData () {
+      try {
+        const projectList = await getProjectList({ page: this.currentPage, size: 4, productType: 1 })
+        if (projectList) {
+          this.listTotal = projectList.data.totalElements
+        }
+        // 默认页面打开时显示第一个项目的数据
+        if (this.currentProjectId === undefined) {
+          this.currentProjectId = projectList.data.content[0].id
+          this.currentProjectName = projectList.data.content[0].name
+        }
+        this.projectList = projectList.data.content.map(v => {
+          v.radio = Number((v.mete / v.totalMete * 100).toFixed(1))
+          v.projectId = v.id
+          return v
+        })
+        const chart = await getChart({ projectId: this.currentProjectId, productType: 1, date: Date.parse(new Date()) })
+        const mete = []
+        // 默认12个月都为0
+        this.meteArr = new Array(12).fill(0)
+        chart.data.months.map(v => {
+          mete.push({ month: Number(v.date.substring(5)), mete: v.mete, quantity: v.quantity })
+        })
+        for (let i = 0; i <= 12; i++) {
+          mete.map(v => {
+            if (i + 1 === v.month) {
+              this.meteArr[i] = v.mete
+            }
+          })
+        }
+      } catch (error) {
+        console.log(error)
+      } finally {
+        this.init()
+        this.fetchOtherData()
+        this.getMonitor()
+      }
+    },
+    async fetchOtherData () {
+      try {
+        const otherData = await get({ projectId: this.currentProjectId })
+        if (otherData.data) {
+          this.buildersNumber = otherData.data.buildersNumber
+          this.managerNumber = otherData.data.managerNumber
+          this.duration = otherData.data.duration
+          this.safetyPoduction = otherData.data.safetyPoduction
+          this.amountStructure = otherData.data.amountStructure
+          this.projectArea = otherData.data.projectArea
+
+          this.fineParticulateMatter = otherData.data.weatherVO.fineParticulateMatter
+          this.inhalableParticle = otherData.data.weatherVO.inhalableParticle
+          this.sulfurDioxide = otherData.data.weatherVO.sulfurDioxide
+          this.nitrogenDioxide = otherData.data.weatherVO.nitrogenDioxide
+          this.ozone = otherData.data.weatherVO.ozone
+          this.carbonicOxide = otherData.data.weatherVO.carbonicOxide
+
+          this.weather = otherData.data.weatherVO.weather
+          this.temperature = otherData.data.weatherVO.temperature
+          this.windDirection = otherData.data.weatherVO.windDirection
+          this.windPower = otherData.data.weatherVO.windPower
+          this.humidity = otherData.data.weatherVO.humidity
+
+          this.attendanceList = otherData.data.gateCard
+        }
+      } catch (error) {
+        console.log(error)
+      }
     }
   }
 }
@@ -331,6 +438,13 @@ $--grey: rgb(214,224,235);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  .el-table{
+    padding: 0 2px;
+    .el-table,.el-table__expanded-cell{
+      // TODO 无效 修改样式
+      background-color: black;
+    }
+  }
   .center{
     // width: 900px;
     height: 100%;
@@ -350,8 +464,8 @@ $--grey: rgb(214,224,235);
     }
     .data{
       position: relative;
-      height: 184px;
-      margin-bottom: 32px;
+      height: 215px;
+      margin-bottom: 15px;
       color: #fff;
       .icon{
         float: left;
@@ -402,15 +516,19 @@ $--grey: rgb(214,224,235);
     .model{
       position: relative;
       width: 100%;
-      height: 491px;
+      height: 531px;
       background-color: $--grey;
       border-image: url('./img/1.png') 32 37 fill / 32px 37px / 0 stretch;
+    }
+    .monitorList{
+      width: calc(100% - 10px);
+      height: 535px;
+      margin-left: 10px;
+      border-image: url('./img/1.png') 32 37 fill / 32px 37px / 0 stretch;
       &__title{
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        z-index: 9;
-        height: 30px;
+        color: #fff;
+        font-size: 14px;
+        text-align: center;
       }
     }
   }
@@ -419,7 +537,7 @@ $--grey: rgb(214,224,235);
     height: 100%;
     .project{
       position: relative;
-      height: 240px;
+      height: 260px;
       margin-bottom: 15px;
       border-image: url('./img/1.png') 32 37 fill / 32px 37px / 0 stretch;
       .title{
@@ -450,7 +568,8 @@ $--grey: rgb(214,224,235);
     // flex: 1;
     height: 100%;
     .monitor{
-      height: 240px;
+      width: 100%;
+      height: 260px;
       margin-bottom: 15px;
       border-image: url('./img/1.png') 32 37 fill / 32px 37px / 0 stretch;
       &__title{

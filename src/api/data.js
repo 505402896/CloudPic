@@ -1,6 +1,7 @@
 import { request } from '@/api/request'
 
-export function getData (params) {
+// 获取图标数据
+export function getChart (params) {
   return request({
     url: '/api/cloudPicture/installation/mete/chart',
     method: 'get',
@@ -8,6 +9,7 @@ export function getData (params) {
   })
 }
 
+// 获取项目列表
 export function getProjectList (params) {
   return request({
     url: '/api/cloudPicture/installation/project',
@@ -16,10 +18,11 @@ export function getProjectList (params) {
   })
 }
 
-export function getMonitor (data) {
+export function getMonitor (params) {
   return request({
-    url: `/api/cloudPicture/cameraIndexCodeLists?pageNo=${data.pageNo}&pageSize=${data.pageSize}`,
-    method: 'post'
+    url: '/api/cloudPicture/cameraIndexCodeList',
+    method: 'post',
+    params
   })
 }
 
@@ -29,5 +32,12 @@ export function get (params) {
     url: '/api/cloudPicture/project/basis',
     method: 'get',
     params
+  })
+}
+
+export function getMonitorInfo () {
+  return request({
+    url: '/api/cloudPicture/cameraIndexCode',
+    method: 'post'
   })
 }

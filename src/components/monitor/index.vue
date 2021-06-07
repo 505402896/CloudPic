@@ -1,5 +1,5 @@
 <template>
-  <div id="playWnd" class="playWnd" ref="playWnd">
+  <div :id="modelId" v-loading="loading" class="playWnd" ref="playWnd" style="width:460px;height:260px;">
   </div>
 </template>
 <script src="./jquery-1.12.4.min.js"></script>
@@ -14,12 +14,17 @@ export default {
     cameraIndexCode: {
       type: String,
       default: ''
+    },
+    modelId: {
+      type: String,
+      required: true
     }
   },
   data () {
     return {
       initCount: 0,
       pubKey: '',
+      loading: false,
       oWebControl: null
     }
   },
@@ -41,10 +46,10 @@ export default {
   methods: {
     // 创建播放实例
     initPlugin () {
-      console.log(1)
+      this.loading = true
       let _this = this
       this.oWebControl = new WebControl({
-        szPluginContainer: 'playWnd',                         // 指定容器id
+        szPluginContainer: _this.modelId,                         // 指定容器id
         iServicePortStart: 15900,                             // 指定起止端口号，建议使用该值
         iServicePortEnd: 15909,
         szClassId: '23BF3B0A-2C56-4D97-9C03-0CB103AA8F11',    // 用于IE10使用ActiveX的clsid
@@ -55,7 +60,7 @@ export default {
             _this.oWebControl.JS_SetWindowControlCallback({   // 设置消息回调
               cbIntegrationCallBack: this.cbIntegrationCallBack
             })
-            _this.oWebControl.JS_CreateWnd('playWnd', 443, 240).then(() => { // JS_CreateWnd创建视频播放窗口，宽高可设定
+            _this.oWebControl.JS_CreateWnd(_this.modelId, 443, 240).then(() => { // JS_CreateWnd创建视频播放窗口，宽高可设定
               _this.init()  // 创建播放实例成功后初始化
             })
           },() => { // 启动插件服务失败
@@ -84,7 +89,6 @@ export default {
           this.oWebControl = null
         }
       })
-      console.log(this.oWebControl)
     },
     // 设置窗口控制回调
     setCallbacks () {
@@ -98,7 +102,6 @@ export default {
     },
     // 初始化
     init () {
-      console.log(2)
       this.getPubKey(() => {
         const appkey = '25841360'                           // 综合安防管理平台提供的appkey，必填
         const secret = this.setEncrypt('iS3DJDCihQadHsP7mSpQ')   // 综合安防管理平台提供的secret，必填
@@ -110,7 +113,7 @@ export default {
         const layout = '1x1'                                // playMode指定模式的布局
         const enableHTTPS = 1                               // 是否启用HTTPS协议与综合安防管理平台交互，这里总是填1
         const encryptedFields = 'secret'                    // 加密字段，默认加密领域为secret
-        const showToolbar = 1                               // 是否显示工具栏，0-不显示，非0-显示
+        const showToolbar = 0                               // 是否显示工具栏，0-不显示，非0-显示
         const showSmart = 1                                 // 是否显示智能信息（如配置移动侦测后画面上的线框），0-不显示，非0-显示
         const buttonIDs = '0,16,256,257,258,259,260,512,513,514,515,516,517,768,769'  //自定义工具条按钮
         this.oWebControl.JS_RequestInterface({
@@ -131,7 +134,7 @@ export default {
             buttonIDs: buttonIDs                       // 自定义工具条按钮
           })
         }).then((oData) => {
-        this.oWebControl.JS_Resize(1000, 600)  // 初始化后resize一次，规避firefox下首次显示窗口后插件窗口未与DIV窗口重合问题
+        this.oWebControl.JS_Resize(460, 260)  // 初始化后resize一次，规避firefox下首次显示窗口后插件窗口未与DIV窗口重合问题
         this.preview(this.cameraIndexCode)
         })
       })
@@ -143,7 +146,6 @@ export default {
         argument: JSON.stringify({ keyLength: 1024 })
         })
       .then((oData) => {
-        console.log(oData)
         if (oData.responseMsg.data) {
           this.pubKey = oData.responseMsg.data
           callback ()
@@ -162,7 +164,6 @@ export default {
 
     // 视频预览功能
     preview (code) {
-      console.log('code',code)
       const cameraIndexCode = code                             // 获取输入的监控点编号值，必填
       const streamMode = 0                                      // 主子码流标识：0-主码流，1-子码流
       const transMode = 1                                       // 传输协议：0-UDP，1-TCP
@@ -181,6 +182,13 @@ export default {
           gpuMode: gpuMode,                               // 是否开启GPU硬解
           wndId: wndId                                     // 可指定播放窗口
         })
+      })
+      this.loading = false
+    },
+    // 停止全部预览
+    stop () {
+      this.oWebControl.JS_RequestInterface({
+        funcName: "stopAllPreview"
       })
     }
   }
