@@ -475,6 +475,7 @@ $--grey: rgb(214,224,235);
     height: 150px;
     margin-top: -50px;
     background: url('./img/3.png');
+    background-size: 100% 50%;
     h1{
       width: 100%;
       font-size: 35px;
