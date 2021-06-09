@@ -1,5 +1,5 @@
 {
-  "name": "shandong",
+  "name": "cloud-atlas",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,8 @@
   "dependencies": {
     "core-js": "^3.6.5",
     "echarts": "^4.9.0",
-    "vue": "^2.6.11"
+    "vue": "^2.6.11",
+    "vue-seamless-scroll": "^1.1.23"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

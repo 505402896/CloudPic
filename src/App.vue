@@ -12,13 +12,14 @@
               <el-table
                 :data="projectList"
                 stripe
-                :header-cell-style="{background:'#0A1121',borderColor:'#0A1121',textAlign:'center'}"
+                :cell-style="tableRowStyle"
+                :header-cell-style="{background:'#2157B9',borderColor:'#2157B9',textAlign:'center'}"
                 style="width: 100%">
                 <el-table-column style="cursor: pointer;" type="index" label="序号">
                 </el-table-column>
-                <el-table-column prop="name" label="项目名称">
+                <el-table-column prop="name" label="项目名称" :show-overflow-tooltip="true">
                   <template slot-scope="scope">
-                    <span style="cursor: pointer;" @click="changeId(scope.row.projectId)">{{ scope.row.name }}</span>
+                    <span style="cursor: pointer;" @click="changeId(scope.row)">{{ scope.row.name }}</span>
                   </template>
                 </el-table-column>
                 <el-table-column style="cursor: pointer;" prop="radio" label="完成占比">
@@ -35,6 +36,7 @@
                 :current-page.sync="currentPage"
                 :page-size="4"
                 layout="prev, pager, next"
+                style="text-align:center;"
                 :total="listTotal">
               </el-pagination>
             </div>
@@ -42,19 +44,26 @@
               <div class="title">项目月安装分析</div>
               <div class="pic"></div>
             </div>
-            <div class="attendance project">
+            <div class="attendance project" style="overflow:hidden;">
               <div class="title">工地今日出勤</div>
-              <el-table
-                :data="attendanceList"
-                stripe
-                :height="223"
-                :header-cell-style="{background:'#0A1121',borderColor:'#0A1121',textAlign:'center'}"
-                style="width: 100%;">
-                <el-table-column prop="profession" label="工种" />
-                <el-table-column prop="peopleNumber" label="人数" />
-                <el-table-column prop="absenteeism" label="出勤" />
-                <el-table-column prop="attendance" label="缺勤" />
-              </el-table>
+                <ul class="attendance__th">
+                  <li style="flex:1;">工种</li>
+                  <li style="flex:1;">人数</li>
+                  <li style="flex:1;">出勤</li>
+                  <li style="flex:1;">缺勤</li>
+                </ul>
+                <div class="attendance__tb">
+                <vue-seamless-scroll :data="attendanceList" :class-option="defaultOption" class="seamless-warp">
+                    <ul>
+                      <li v-for="(item,index) in attendanceList" :key="index">
+                      <span>{{ item.profession }}</span>
+                      <span>{{ item.peopleNumber }}</span>
+                      <span>{{ item.absenteeism }}</span>
+                      <span>{{ item.attendance }}</span>
+                      </li>
+                    </ul>
+                </vue-seamless-scroll>
+                </div>
             </div>
           </div>
         </el-col>
@@ -67,63 +76,59 @@
               <div class="data__left">
                 <div class="data__left-up">
                   <div>
-                    <div class="icon iconfont">&#xe6a3;</div>
-                    <h3>{{ buildersNumber }}</h3>
+                    <div class="icon iconfont" style="color:#40A9FF;">&#xe6a3;</div>
+                    <h3 v-if="projectInfo.buildersNumber">{{ projectInfo.buildersNumber }}</h3>
+                    <h3 v-else>0</h3>
                     <p>今日施工人数</p>
                   </div>
                   <div>
-                    <div class="icon iconfont">&#xe6d5;</div>
-                    <h3>{{ `${duration} 天` }}</h3>
+                    <div class="icon iconfont" style="color:#FAAD14;">&#xe6d5;</div>
+                    <h3 v-if="projectInfo.duration">{{ `${projectInfo.duration} 天` }}</h3>
+                    <h3 v-else>0 天</h3>
                     <p>工期</p>
                   </div>
                   <div>
-                    <div class="icon iconfont">&#xe6eb;</div>
-                    <h3>{{ `${amountStructure} t` }}</h3>
+                    <div class="icon iconfont" style="color:#D9D9D9;">&#xe6eb;</div>
+                    <h3 v-if="projectInfo.amountStructure">{{ projectInfo.amountStructure | unitFormat }} t</h3>
+                    <h3 v-else>0 t</h3>
                     <p>结构量</p>
                   </div>
                 </div>
                 <div class="data__left-down">
                   <div>
-                    <div class="icon iconfont">&#xe6a3;</div>
-                    <h3>{{ managerNumber }}</h3>
+                    <div class="icon iconfont" style="color:#07CFB4;">&#xe6a3;</div>
+                    <h3 v-if="projectInfo.managerNumber">{{ projectInfo.managerNumber }}</h3>
+                    <h3 v-else>0</h3>
                     <p>管理人员人数</p>
                   </div>
                   <div>
-                    <div class="icon iconfont">&#xe6e0;</div>
-                    <h3>{{ `${safetyPoduction} 天` }}</h3>
+                    <div class="icon iconfont" style="color:#FF4D4F;">&#xe6e0;</div>
+                    <h3 v-if="projectInfo.safetyPoduction">{{ `${projectInfo.safetyPoduction} 天` }}</h3>
+                    <h3 v-else>0 天</h3>
                     <p>安全生产</p>
                   </div>
                   <div>
-                    <div class="icon iconfont">&#xe6af;</div>
-                    <h3>{{ `${projectArea} ㎡` }}</h3>
+                    <div class="icon iconfont" style="color:#FFD666;">&#xe6af;</div>
+                    <h3 v-if="projectInfo.projectArea">{{ projectInfo.projectArea | unitFormat }} ㎡</h3>
+                    <h3 v-else>0 ㎡</h3>
                     <p>项目面积</p>
                   </div>
                 </div>
               </div>
               <div class="data__right">
-                <div>
-                  <span>PM2.5:</span><b>{{ fineParticulateMatter }}</b>
-                </div>
-                <div>
-                  <span>PM10:</span><b>{{ inhalableParticle }}</b>
-                </div>
-                <div>
-                  <span>SO2:</span><b>{{ sulfurDioxide }}</b>
-                </div>
-                <div>
-                  <span>NO2:</span><b>{{ nitrogenDioxide }}</b>
-                </div>
-                <div>
-                  <span>O3:</span><b>{{ ozone }}</b>
-                </div>
-                <div>
-                  <span>CO:</span><b>{{ carbonicOxide }}</b>
-                </div>
+                <vue-seamless-scroll :data="weatherList" :class-option="defaultOption" class="seamless-warp">
+                  <ul>
+                    <li v-for="(item,index) in weatherList" :key="index">
+                      <span class="name" v-text="item.name"></span>
+                      <span class="data" v-text="item.data" style="margin-left:10px;color:#fff;font-weight:700;"></span>
+                    </li>
+                  </ul>
+                </vue-seamless-scroll>
               </div>
             </div>
             <el-row>
               <el-col :span="18">
-                <iframe class="model">
+                <iframe class="model" :src="modelURL">
                 </iframe>
               </el-col>
               <el-col :span="6">
@@ -135,10 +140,11 @@
                   :data="monitorList"
                   stripe
                   :height="514"
-                  :header-cell-style="{background:'#0A1121',borderColor:'#0A1121',textAlign:'center'}"
+                  :cell-style="tableRowStyle"
+                  :header-cell-style="{background:'#2157B9',borderColor:'#2157B9',textAlign:'center'}"
                   style="width: 100%">
                     <el-table-column type="index" label="序号" />
-                    <el-table-column prop="name" label="区域名">
+                    <el-table-column prop="name" :show-overflow-tooltip="true" label="区域名">
                       <template slot-scope="scope">
                         <span style="cursor: pointer;" @click="changeMonitor(scope.row.indexCode)">{{ scope.row.name }}</span>
                       </template>
@@ -151,21 +157,21 @@
         </el-col>
         <el-col :span="6">
           <div class="right">
-            <div class="monitor" v-loading="loading">
-              <monitor v-if="monitorArr.length !== 0" ref="monitorFirst" :camera-index-code="monitorFirst" modelId="playModeOne" />
+            <div :class="{'monitor': true, 'border': !hasMonitor && !monitorFirst}">
+              <monitor v-if="hasMonitor && monitorFirst" ref="monitorFirst" :camera-index-code="monitorFirst" modelId="playModeOne" />
               <div class="monitor__title" v-else>
                 <span>监控未连接</span>
               </div>
             </div>
-            <div class="monitor">
-              <monitor v-if="monitorArr.length !== 0" :camera-index-code="monitorSec" modelId="playModeTwo" />
+            <div :class="{'monitor': true, 'border': !hasMonitor && !monitorSec}">
+              <monitor v-if="hasMonitor && monitorSec" ref="monitorSec" :camera-index-code="monitorSec" modelId="playModeTwo" />
               <div class="monitor__title" v-else>
                 <span>监控未连接</span>
               </div>
             </div>
-            <div class="monitor">
-              <!-- <monitor v-if="monitorArr.length !== 0" :camera-index-code="monitorArr[2]" style="padding:2px" /> -->
-              <div class="monitor__title">
+            <div :class="{'monitor': true, 'border': !hasMonitor && !monitorThird}">
+              <monitor v-if="hasMonitor && monitorThird" ref="monitorThird" :camera-index-code="monitorThird" modelId="playModeThree"/>
+              <div class="monitor__title" v-else>
                 <span>监控未连接</span>
               </div>
             </div>
@@ -175,7 +181,6 @@
     </main>
   </div>
 </template>
-
 <script>
 import { getChart, getProjectList, getMonitor, get } from '@/api/data'
 import Monitor from '@/components/monitor/index.vue'
@@ -193,38 +198,64 @@ export default {
       currentProjectName: '',
       meteArr: [],
       monitorArr: [],
+      weatherList: [],
       monitorList: [], // 监控在线列表
       monitorFirst: '', // 第一个监控
       monitorSec: '', // 第二个监控
       monitorThird: '', // 第三个监控
-      buildersNumber: 0, // 今日施工人数
-      managerNumber: 0, // 管理人数
-      duration: 0,  // 工期
-      safetyPoduction: 0, // 安全生产天数
-      amountStructure: 0, // 结构量
-      projectArea: 0, // 项目面积
-      fineParticulateMatter: 0, // PM2.5
-      inhalableParticle: 0, // PM10
-      sulfurDioxide: 0, // SO2
-      nitrogenDioxide: 0, // NO2
-      ozone: 0, // O3
-      carbonicOxide: 0, // CO
-      weather: '', // 天气现象
-      temperature: '', // 实时温度
-      windDirection: '', // 风力描述
-      windPower: '', // 风力级别
-      humidity: '' // 空气湿度
+      projectInfo: {
+        buildersNumber: 0, // 今日施工人数
+        managerNumber: 0, // 管理人数
+        duration: 0,  // 工期
+        safetyPoduction: 0, // 安全生产天数
+        amountStructure: 0, // 结构量
+        projectArea: 0 // 项目面积
+      }
     }
   },
   computed: {
-    loading () {
-      return this.monitorArr.length === 0
+    defaultOption () {
+      return {
+        step: 0.1, // 数值越大速度滚动越快
+        limitMoveNum: 2, // 开始无缝滚动的数据量 this.dataList.length
+        hoverStop: true, // 是否开启鼠标悬停stop
+        direction: 1, // 0向下 1向上 2向左 3向右
+        openWatch: true, // 开启数据实时监控刷新dom
+        singleHeight: 0, // 单步运动停止的高度(默认值0是无缝不停止的滚动) direction => 0/1
+        singleWidth: 0, // 单步运动停止的宽度(默认值0是无缝不停止的滚动) direction => 2/3
+        waitTime: 1000 // 单步运动停止的时间(默认值1000ms)
+      }
+    },
+    hasMonitor () {
+      return this.monitorArr.length !== 0
+    },
+    modelURL () {
+      return 'https://fhgg.hzchum.com/fh/'
+    }
+  },
+  filters: {
+    unitFormat (value) {
+      return value.toFixed().replace(/\d(?=(?:\d{3})+\b)/g, '$&,')
     }
   },
   created () {
     this.$nextTick(() => {
       this.fetchData()
     })
+  },
+  mounted () {
+    // 监听滚动条scroll事件，使插件窗口跟随浏览器滚动而移动
+    window.onscroll = () => {
+      this.$refs.monitorFirst.fixed()
+      this.$refs.monitorSec.fixed()
+      this.$refs.monitorThird.fixed()
+    }
+    // 监听resize事件，使插件窗口尺寸跟随DIV窗口变化
+    window.onresize = () => {
+      this.$refs.monitorFirst.fixed()
+      this.$refs.monitorSec.fixed()
+      this.$refs.monitorThird.fixed()
+    }
   },
   watch: {
     currentPage: {
@@ -274,13 +305,20 @@ export default {
         }]
       })
     },
-    changeId (id) {
-      this.currentProjectId = id
+    tableRowStyle ({ row, rowIndex }) {
+      if (rowIndex % 2 === 0) {
+        return 'background-color:#102F8D;border:none'
+      } else {
+        return 'background-color:#0C2573;border:none'
+      }
+    },
+    changeId (row) {
+      this.currentProjectId = row.id
+      this.currentProjectName = row.name
       this.fetchData()
     },
     changeMonitor (indexCode) {
       this.$refs.monitorFirst.stop()
-      // this.monitorFirst = indexCode
       this.$refs.monitorFirst.preview(indexCode)
     },
     async fetchProject () {
@@ -295,6 +333,7 @@ export default {
     },
     async getMonitor () {
       const monitorRes = await getMonitor({ pageNo: 1, pageSize: 100, projectId: this.currentProjectId })
+      this.monitorArr = []
       if (monitorRes) {
         this.monitorList = monitorRes.data.content.map(v => {
           // 在线设备为1  离线为0
@@ -306,6 +345,7 @@ export default {
         })
         this.monitorFirst = this.monitorArr[0]
         this.monitorSec = this.monitorArr[1]
+        this.monitorThird = this.monitorArr[2]
       }
     },
     async fetchData () {
@@ -353,27 +393,30 @@ export default {
       try {
         const otherData = await get({ projectId: this.currentProjectId })
         if (otherData && otherData.data) {
-          this.buildersNumber = otherData.data.buildersNumber
-          this.managerNumber = otherData.data.managerNumber
-          this.duration = otherData.data.duration
-          this.safetyPoduction = otherData.data.safetyPoduction
-          this.amountStructure = otherData.data.amountStructure
-          this.projectArea = otherData.data.projectArea
+          this.projectInfo.buildersNumber = otherData.data.buildersNumber
+          this.projectInfo.managerNumber = otherData.data.managerNumber
+          this.projectInfo.duration = otherData.data.duration
+          this.projectInfo.safetyPoduction = otherData.data.safetyPoduction
+          this.projectInfo.amountStructure = otherData.data.amountStructure
+          this.projectInfo.projectArea = otherData.data.projectArea
 
-          this.fineParticulateMatter = otherData.data.weatherVO.fineParticulateMatter
-          this.inhalableParticle = otherData.data.weatherVO.inhalableParticle
-          this.sulfurDioxide = otherData.data.weatherVO.sulfurDioxide
-          this.nitrogenDioxide = otherData.data.weatherVO.nitrogenDioxide
-          this.ozone = otherData.data.weatherVO.ozone
-          this.carbonicOxide = otherData.data.weatherVO.carbonicOxide
-
-          this.weather = otherData.data.weatherVO.weather
-          this.temperature = otherData.data.weatherVO.temperature
-          this.windDirection = otherData.data.weatherVO.windDirection
-          this.windPower = otherData.data.weatherVO.windPower
-          this.humidity = otherData.data.weatherVO.humidity
-
+          this.weatherList = [
+            { name: 'PM2.5:', data: otherData.data.weatherVO.fineParticulateMatter },
+            { name: 'PM10:', data: otherData.data.weatherVO.inhalableParticle },
+            { name: 'SO2:', data: otherData.data.weatherVO.sulfurDioxide },
+            { name: 'NO2:', data: otherData.data.weatherVO.nitrogenDioxide },
+            { name: 'O3:', data: otherData.data.weatherVO.ozone },
+            { name: 'CO:', data: otherData.data.weatherVO.carbonicOxide },
+            { name: '天气现象:', data: otherData.data.weatherVO.weather },
+            { name: '实时温度:', data: otherData.data.weatherVO.temperature },
+            { name: '风力描述:', data: otherData.data.weatherVO.windDirection },
+            { name: '风力级别:', data: otherData.data.weatherVO.windPower },
+            { name: '空气湿度:', data: otherData.data.weatherVO.humidity }
+          ]
           this.attendanceList = otherData.data.gateCard
+        } else {
+          this.attendanceList = []
+          this.projectInfo = {}
         }
       } catch (error) {
         console.log(error)
@@ -384,7 +427,7 @@ export default {
 </script>
 
 <style lang="scss">
-
+$--deep-blue: #2157B9;
 $--primary-blue: #5fd0f1;
 $--light-blue: #6bc1ff;
 $--bc-blue: #3488ed80;
@@ -398,41 +441,67 @@ $--grey: rgb(214,224,235);
     padding: 0;
     margin: 0;
     box-sizing: border-box;
-    background: url('./img/2.jpg');
+    // background: url('./img/2.jpg');
+    background-image: linear-gradient(60deg, #080c3b 0%, #05118f 57%, #080c3b 97%);
   }
   .app{
     position: relative;
     width: 100%;
     height: 100%;
   }
+  .border {
+    border-image: url('./img/1.png') 32 37 fill / 32px 37px / 0 stretch;
+  }
+  /*定义滚动条样式（高宽及背景）*/
+  ::-webkit-scrollbar {
+    width: 5px; /* 滚动条宽度， width：对应竖滚动条的宽度 height：对应横滚动条的高度*/
+    background: #fff;
+  }
+    /*定义滚动条轨道（凹槽）样式*/
+  ::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 2px #afaeae; /* 较少使用 */
+    border-radius: 10px;
+  }
+    /*定义滑块 样式*/
+  ::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    width: 10px;
+    height: 50px; /* 滚动条滑块长度 */
+    background-color: #afaeae;
+  }
   header{
+    position: relative;
     width: 100%;
     height: 150px;
     margin-top: -50px;
     background: url('./img/3.png');
     h1{
       width: 100%;
-      font-size: 38px;
-      // font-family: YouYuan, Arial, sans-serif;
+      font-size: 35px;
+      font-family: YouYuan, Arial, sans-serif;
       color: $--primary-blue;
       text-align: center;
       line-height: 180px;
     }
-    a{
-      display: block;
-      color: unset;
-      text-decoration: none;
-      background-image: linear-gradient(0deg, rgb(3, 175, 239) 0%, rgb(189, 240, 241) 95%);
-      -webkit-text-fill-color: transparent;
-      overflow: unset;
-      white-space: unset;
-      text-overflow: unset;
-    }
   }
   main{
-    // display: flex;
     margin: 0 30px;
     height: calc( 100vh - 150px );
+  }
+  .el-table, .el-table__expanded-cell{
+    background-color: transparent !important;
+  }
+  .el-table--border::after, .el-table--group::after, .el-table::before{
+    background-color: transparent !important;
+  }
+  .el-table__body{
+    tr,tr:hover{
+      font-size: 10px;
+      color: #fff;
+    }
+  }
+  .el-progress__text {
+    color: #fff !important;
   }
   @font-face {
   font-family: 'iconfont';  /* Project id 2121632 */
@@ -447,15 +516,7 @@ $--grey: rgb(214,224,235);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  .el-table{
-    padding: 0 2px;
-    .el-table,.el-table__expanded-cell{
-      // TODO 无效 修改样式
-      background-color: black;
-    }
-  }
   .center{
-    // width: 900px;
     height: 100%;
     margin: 0 20px;
     .title{
@@ -510,7 +571,8 @@ $--grey: rgb(214,224,235);
         position: absolute;
         right: 0;
         width: 20%;
-        height: 100%;
+        height: 175px;
+        overflow: hidden;
         font-size: 17px;
         margin: 20px 0;
         line-height: 25px;
@@ -539,25 +601,6 @@ $--grey: rgb(214,224,235);
         font-size: 14px;
         text-align: center;
       }
-    }
-  }
-  .left{
-    // flex: 1;
-    height: 100%;
-    .project{
-      position: relative;
-      height: 260px;
-      margin-bottom: 15px;
-      border-image: url('./img/1.png') 32 37 fill / 32px 37px / 0 stretch;
-      .title{
-        color: #fff;
-        padding: 8px;
-        font-size: 14px;
-      }
-      .pic{
-        width: 100%;
-        height: calc( 100% - 20px );
-      }
       .el-table{
         height: calc(100% - 70px);
         thead{
@@ -573,14 +616,68 @@ $--grey: rgb(214,224,235);
       }
     }
   }
+  .left{
+    height: 100%;
+    .project{
+      position: relative;
+      height: 260px;
+      margin-bottom: 15px;
+      border-image: url('./img/1.png') 32 37 fill / 32px 37px / 0 stretch;
+      .title{
+        color: #fff;
+        padding: 8px;
+        font-size: 14px;
+      }
+      .attendance{
+        position: relative;
+        width: 100%;
+        &__th{
+          display:flex;
+          padding: 8px;
+          width: 100%;
+          background: $--deep-blue;
+          color:#fff;
+          font-weight: 700;
+          font-size: 12px;
+          list-style-type: none;
+        }
+        &__tb{
+          width: 100%;
+          overflow:hidden;
+          color:#fff;
+          padding: 8px;
+          li{
+            width:100%;
+            display:flex;
+            line-height: 30px;
+            span{
+              flex: 1;
+            }
+          }
+        }
+      }
+      .pic{
+        width: 100%;
+        height: calc( 100% - 20px );
+      }
+      .el-table{
+        height: calc(100% - 70px);
+        thead{
+          color: #fff;
+          height: 20px;
+        }
+        th,td{
+          padding: 5px 0;
+        }
+      }
+    }
+  }
   .right{
-    // flex: 1;
     height: 100%;
     .monitor{
       width: 100%;
       height: 260px;
       margin-bottom: 15px;
-      border-image: url('./img/1.png') 32 37 fill / 32px 37px / 0 stretch;
       &__title{
         color: #fff;
         text-align: center;

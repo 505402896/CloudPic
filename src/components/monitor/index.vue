@@ -1,5 +1,5 @@
 <template>
-  <div :id="modelId" v-loading="loading" class="playWnd" ref="playWnd" style="width:460px;height:260px;">
+  <div v-if="cameraIndexCode" :id="modelId" v-loading="loading" class="playWnd" :ref="modelId" style="width:460px;height:260px;">
   </div>
 </template>
 <script src="./jquery-1.12.4.min.js"></script>
@@ -28,16 +28,11 @@ export default {
       oWebControl: null
     }
   },
-  created () {
-    // this.initPlugin()
-    // this.init()
-  },
   watch: {
     cameraIndexCode: {
       handler (val) {
         if (val) {
           this.initPlugin()
-          // this.preview(val)
         }
       },
       immediate: true
@@ -116,6 +111,7 @@ export default {
         const showToolbar = 0                               // 是否显示工具栏，0-不显示，非0-显示
         const showSmart = 1                                 // 是否显示智能信息（如配置移动侦测后画面上的线框），0-不显示，非0-显示
         const buttonIDs = '0,16,256,257,258,259,260,512,513,514,515,516,517,768,769'  //自定义工具条按钮
+        const reconnectTimes = 3                             // 重连次数
         this.oWebControl.JS_RequestInterface({
           funcName: 'init',
           argument: JSON.stringify({
@@ -131,7 +127,8 @@ export default {
             encryptedFields: encryptedFields,          // 加密字段
             showToolbar: showToolbar,                  // 是否显示工具栏
             showSmart: showSmart,                      // 是否显示智能信息
-            buttonIDs: buttonIDs                       // 自定义工具条按钮
+            buttonIDs: buttonIDs,                      // 自定义工具条按钮
+            reconnectTimes: reconnectTimes             // 重连次数
           })
         }).then((oData) => {
         this.oWebControl.JS_Resize(460, 260)  // 初始化后resize一次，规避firefox下首次显示窗口后插件窗口未与DIV窗口重合问题
@@ -158,10 +155,36 @@ export default {
       encrypt.setPublicKey(this.pubKey)
       return encrypt.encrypt(value)
     },
-    // 监听resize事件，使插件窗口尺寸跟随DIV窗口变化
-    // 监听滚动条scroll事件，使插件窗口跟随浏览器滚动而移动
     // 设置窗口裁剪，当因滚动条滚动导致窗口需要被遮住的情况下需要JS_CuttingPartWindow部分窗口
+    setWndCover () {
+      let iWidth = document.documentElement.clientWidth
+      let iHeight = document.documentElement.clientWidth
+      let oDivRect = this.$refs[this.modelId].getBoundingClientRect()
 
+      let iCoverLeft = (oDivRect.left < 0) ? Math.abs(oDivRect.left): 0
+      let iCoverTop = (oDivRect.top < 0) ? Math.abs(oDivRect.top): 0
+      let iCoverRight = (oDivRect.right - iWidth > 0) ? Math.round(oDivRect.right - iWidth) : 0
+      let iCoverBottom = (oDivRect.bottom - iHeight > 0) ? Math.round(oDivRect.bottom - iHeight) : 0
+
+      iCoverLeft = (iCoverLeft > 460) ? 460 : iCoverLeft
+      iCoverTop = (iCoverTop > 260) ? 260 : iCoverTop
+      iCoverRight = (iCoverRight > 460) ? 460 : iCoverRight
+      iCoverBottom = (iCoverBottom > 260) ? 260 : iCoverBottom
+
+      this.oWebControl.JS_RepairPartWindow(0, 0, 461, 260)    // 多1个像素点防止还原后边界缺失一个像素条
+      if (iCoverLeft != 0) {
+        this.oWebControl.JS_CuttingPartWindow(0, 0, iCoverLeft, 260)
+      }
+      if (iCoverTop != 0) {
+        this.oWebControl.JS_CuttingPartWindow(0, 0, 461, iCoverTop)    // 多剪掉一个像素条，防止出现剪掉一部分窗口后出现一个像素条
+      }
+      if (iCoverRight != 0) {
+        this.oWebControl.JS_CuttingPartWindow(460 - iCoverRight, 0, iCoverRight, 260)
+      }
+      if (iCoverBottom != 0) {
+        this.oWebControl.JS_CuttingPartWindow(0, 260 - iCoverBottom, 460, iCoverBottom)
+      }
+    },
     // 视频预览功能
     preview (code) {
       const cameraIndexCode = code                             // 获取输入的监控点编号值，必填
@@ -190,14 +213,27 @@ export default {
       this.oWebControl.JS_RequestInterface({
         funcName: "stopAllPreview"
       })
+    },
+    // 固定空间位置
+    fixed () {
+      if (this.oWebControl != null) {
+        this.oWebControl.JS_Resize(460, 260)
+        this.setWndCover()
+      }
+    },
+    close () {
+      if (this.oWebControl != null) {
+      this.oWebControl.JS_HideWnd()   // 先让窗口隐藏，规避可能的插件窗口滞后于浏览器消失问题
+      this.oWebControl.JS_Disconnect().then(() => {  // 断开与插件服务连接成功
+      },
+        () => {  // 断开与插件服务连接失败
+        console.log('断开与插件服务连接失败')
+        })
+      }
     }
+  },
+  destroyed () {
+    this.close()
   }
 }
 </script>
-
-<style>
- #playWnd{
-   width: 100%;
-   height: 100%;
- }
-</style>
